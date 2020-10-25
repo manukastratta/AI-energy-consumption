@@ -1,5 +1,10 @@
 import csv
 import datetime
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from matplotlib import pyplot as plt
+
 
 class Data:
     def __init__(self, filename):
@@ -65,6 +70,27 @@ def create_2019_data():
         csvwriter.writerows(rows_2019)
 
 
-all_data = Data("san_diego_2014_to_2019_dataset.csv") # reads and initializes data
+def linear_regression_simple():
+    df = pd.read_csv("san_diego_2019_dataset.csv")
+    
+    X = np.asarray(df["mintempC"]).reshape((-1,1)) # needs to have shape (8760, 1)
+    y = np.asarray(df["MWh"]) # needs to have shape (8760,)
+
+    model = LinearRegression().fit(X, y)
+    print('intercept:', model.intercept_)
+    print('slope:', model.coef_)
+
+    plt.title("San Diego 2019, Linear Regression")
+    plt.xlabel("Min Temp (C)")
+    plt.ylabel("Consumption (MWh)")
+
+    plt.scatter(X, y,color='g')
+    plt.plot(X, model.predict(X),color='b')
+
+    plt.show()
 
 
+if __name__ == "__main__":
+    # all_data = Data("san_diego_2014_to_2019_dataset.csv") # reads and initializes data
+    # data = Data("san_diego_2019_dataset.csv")
+    linear_regression_simple()
