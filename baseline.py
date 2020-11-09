@@ -6,7 +6,7 @@ from sklearn import linear_model
 import sklearn.metrics as metrics
 from matplotlib import pyplot as plt
 import statsmodels.api as sm
-from utils import powerset
+from utils import powerset, forecast_accuracy
 
 
 class Data:
@@ -166,12 +166,12 @@ def get_statsmodels_table(X, Y):
     print_model = model.summary()
     print(print_model)
 
-def get_manual_accuracy(Y_test, Y_pred):
+def get_manual_accuracy(Y_test, Y_pred, percent=0.1):
     correct = 0
     for i in range(len(Y_test)):
         true_val = Y_test[i]
         pred = Y_pred[i]
-        margin = 0.1 * true_val
+        margin = percent * true_val
         if pred-margin <= true_val <= pred+margin:
            correct+=1
     accuracy = correct / len(Y_test)
@@ -215,8 +215,8 @@ def multivariable_regression(train_filename, test_filename, features_list):
     regr = linear_model.LinearRegression()
     regr.fit(X_train, Y_train)
 
-    print('Intercept: \n', regr.intercept_)
-    print('Coefficients: \n', regr.coef_)
+    print('Intercept: ', regr.intercept_)
+    print('Coefficients: ', regr.coef_)
 
     # get_statsmodels_table(X,Y)
 
@@ -226,12 +226,15 @@ def multivariable_regression(train_filename, test_filename, features_list):
     Y_test = df_test["MWh"]
 
     Y_pred = regr.predict(X_test)
-    print("Y_pred: ", Y_pred)
     mean_sq_err = metrics.mean_squared_error(Y_test, Y_pred)
     print("mean_sq_err: ", mean_sq_err)
 
-    manual_accuracy = get_manual_accuracy(Y_test, Y_pred)
+    manual_accuracy = get_manual_accuracy(Y_test, Y_pred, percent=0.1)
     print("Manual accuracy: ", manual_accuracy)
+
+    res = forecast_accuracy(Y_pred, Y_test)
+    print(res)
+
 
 
 def experiment_w_features(filename, train_filename, test_filename):
@@ -250,8 +253,8 @@ def experiment_w_features(filename, train_filename, test_filename):
 
 if __name__ == "__main__":
     filename = "texas_2009_to_2019_dataset01.csv"
-    train_filename = "train_texas_2009_to_2017_dataset.csv"
-    test_filename = "test_texas_2018_to_2019_dataset.csv"
+    train_filename = "train_texas_2009_to_2017_dataset.csv"     # 80% of dataset
+    test_filename = "test_texas_2018_to_2019_dataset.csv"       # 20% of dataset
 
     # split_data(filename)
     # create_year_data(filename, "2019")
@@ -263,3 +266,8 @@ if __name__ == "__main__":
     multivariable_regression(train_filename, test_filename, features)
 
     
+"""
+Notes for myself, TODO:
+- Create a new feature that takes into account the month (1,2,...,12)
+- Figure out why I have NANs in my 2 datasets & fix them
+"""
