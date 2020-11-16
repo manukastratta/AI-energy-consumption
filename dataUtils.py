@@ -41,16 +41,35 @@ class Data:
             print(row)
 
 
-# Write to new csv, with only 2019 data
-def datetime_experimentation():
-    rows_2019 = []
-    for row in data.rows:
-        date_time_str = row[0] # eg. 2014-01-01 04:00:00
+def add_months_features_to_dataset():
+    filename =  "texas_2009_to_2019_dataset01.csv"
+    all_data = Data(filename) 
+
+    new_rows = []
+    month_vec = [0 for i in range(12)]
+    for row in all_data.rows:
+        date_time_str = row[0] # eg. 2011-08-01 16:00:00
         date_time_obj = datetime.datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
         
+        new_row = row.copy()
+        new_month_vec = month_vec.copy()
+        new_month_vec[date_time_obj.month - 1] = 1 # switch from 0 to 1
+        new_row = new_row + new_month_vec
+        new_rows.append(new_row)
+    assert len(all_data.rows) == len(new_rows)
 
-    for row in rows_2019[:5]:
-        print(row)
+    # create new file with new rows now
+    new_filename = "texas_2009_to_2019_dataset_with_vector_months.csv"
+    
+    with open(new_filename, 'w') as csvfile:    # writing to csv file 
+        csvwriter = csv.writer(csvfile)  
+        
+        new_fields = all_data.fields.copy()  # writing the fields  
+        months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
+        new_fields = new_fields + months # ['Date', 'MWh', 'uvIndex', 'HeatIndexC', 'WindChillC', 'humidity', 'tempC', 'jan', 'feb', 'mar', 'apr', "may", 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+        csvwriter.writerow(new_fields)  
+            
+        csvwriter.writerows(new_rows) # writing the data rows  
 
 
 def create_year_data(filename, year):
