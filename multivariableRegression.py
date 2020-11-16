@@ -94,6 +94,16 @@ def get_manual_accuracy(Y_test, Y_pred, percent=0.1):
     accuracy = correct / len(Y_test)
     return accuracy
 
+def split_dataset(filename):
+    df_total = pd.read_csv(filename)
+    df_total.dropna(inplace=True) # only 1 row is dropped
+
+    df_train = df_total.iloc[:index_2018_start, :]
+    df_test = df_total.iloc[index_2018_start:, :]
+    df_test = df_test.reset_index() # start rows counting at 0
+
+    return df_train, df_test
+
 def multivariable_regression(filename, features_list):
     """
     COLUMN FIELDS: cols: Date,MWh,uvIndex,HeatIndexC,WindChillC,humidity,tempC, 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', "peakH", "notPeakH"
@@ -106,12 +116,7 @@ def multivariable_regression(filename, features_list):
     mean_sq_err:  25097.500364439336
     Manual accuracy:  0.38396118721461187
     """
-    df_total = pd.read_csv(filename)
-    df_total.dropna(inplace=True) # only 1 row is dropped
-
-    df_train = df_total.iloc[:index_2018_start, :]
-    df_test = df_total.iloc[index_2018_start:, :]
-    df_test = df_test.reset_index() # start rows counting at 0
+    df_train, df_test = split_dataset(filename)
     
     # plot_linear_relationship(df, "tempC")
     # X_train = df_train[["tempC", "HeatIndexC", "WindChillC", "humidity", "uvIndex"]]
@@ -159,12 +164,8 @@ def experiment_w_features(filename, train_filename, test_filename):
         multivariable_regression(train_filename, test_filename, features)
 
 
-def baseline_simple_LR(train_filename, test_filename):
-    df_train = pd.read_csv(train_filename) 
-    df_test = pd.read_csv(test_filename)
-
-    df_train.dropna(inplace=True) # TODO: shouldn't be getting NANs here
-    df_test.dropna(inplace=True)
+def baseline_simple_LR(filename):
+    df_train, df_test = split_dataset(filename)
 
     X_train = df_train[["tempC"]]
     Y_train = df_train["MWh"]
@@ -198,25 +199,7 @@ def baseline_simple_LR(train_filename, test_filename):
 if __name__ == "__main__":
     # filename = "texas_2009_to_2019_dataset01.csv"
     filename = "texas_2009_to_2019_dataset_with_temporal_features.csv"
-    # train_filename = "train_texas_2009_to_2017_dataset.csv"     # 80% of dataset
-    # test_filename = "test_texas_2018_to_2019_dataset.csv"       # 20% of dataset
-
-    # split_data(filename)
-    # create_year_data(filename, "2019")
-
-    # data = Data("san_diego_2019_dataset.csv")
-    # simple_linear_regression(filename)
 
     features = ["tempC", "HeatIndexC", "WindChillC", "humidity", "uvIndex", 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', "peakH", "notPeakH"]
-    # baseline_simple_LR(train_filename, test_filename)
+    # baseline_simple_LR(filename)
     multivariable_regression(filename, features)
-    # add_peak_hours_to_dataset()
-
-    
-
-    
-"""
-Notes for myself, TODO:
-- Create a new feature that takes into account the month (1,2,...,12)
-- Figure out why I have NANs in my 2 datasets & fix them
-"""
