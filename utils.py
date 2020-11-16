@@ -26,6 +26,6 @@ def forecast_accuracy(forecast, actual):
                               actual[:,None]]), axis=1)
     minmax = 1 - np.mean(mins/maxs)             # minmax
 
-    res = {'mape':mape, 'me':me, 'mae': mae, 
-            'mpe': mpe, 'rmse':rmse, 'corr':corr, 'minmax':minmax}
+    res = {'mape':round(mape,2), 'me':round(me,2), 'mae': round(mae,2), 
+            'mpe': round(mpe,2), 'rmse':round(rmse,2), 'corr':round(corr,2), 'minmax':round(minmax,2)}
     return res

@@ -1,3 +1,27 @@
+Results when instead having 12 features for the months: (better accuracy! 51.3%)
+Intercept:  860.7311928115377
+Coefficients:  [  21.59415859    2.19544883  -11.98472475   -1.93605835  -25.69986404
+   49.12482445   -5.8753385   -80.00754051 -130.01221442  -79.99825346
+   55.40917295  107.74511818  112.51370455   38.93043775  -83.58268811
+  -57.16830111   72.92107823]
+mean_sq_err:  16696.382703958887
+Manual accuracy:  0.5132420091324201
+{'mape': 0.11, 'me': -23.15, 'mae': 99.63, 'mpe': -0.01, 'rmse': 129.21, 'corr': 0.72, 'minmax': 0.11}
+
+Results when adding a new column for the month (1 through 12)
+Intercept:  809.3720588397229
+Coefficients:  [ 27.79543144   9.92414469 -28.47997403  -2.93996552  -1.49659005  4.84119999]
+mean_sq_err:  21504.969593825845
+Manual accuracy:  0.44240867579908677
+{'mape': 0.13, 'me': -23.13, 'mae': 114.54, 'mpe': -0.0, 'rmse': 146.65, 'corr': 0.61, 'minmax': 0.12}
+
+Results when including all features:
+Intercept:  829.2318130846693
+Coefficients:  [ 26.77415029  12.09465205 -29.3946928   -2.81113462  -2.37345755]
+mean_sq_err:  21629.355399131226
+Manual accuracy:  0.43767123287671234
+{'mape': 0.13, 'me': -23.14, 'mae': 115.33, 'mpe': -0.0, 'rmse': 147.07, 'corr': 0.6, 'minmax': 0.12}
+
 TOP RESULTS, >0.43:
 
 ************ RESULTS FOR FEATURES: ['HeatIndexC', 'WindChillC', 'humidity', 'tempC'] ************
@@ -152,3 +176,14 @@ Y_pred:  [683.49016746 696.78062427 696.78062427 ... 728.7347523  706.11245988
  694.80131367]
 mean_sq_err:  24919.03556169321
 Manual accuracy:  0.384189497716895
+
+
+
+
+# # SIMPLE EXAMPLE TO PREDICT
+# # MWh,          uvIndex,    HeatIndexC, WindChillC, humidity,   tempC
+# # 782.983977,   2,          13,         12,         63,         12
+# X_test_example = [[12, 13, 12, 63, 2]]
+# Y_test_example = [[782.98]]
+# Y_pred_example = regr.predict(X_test_example)
+# print("Y_pred_example: ", Y_pred_example)
