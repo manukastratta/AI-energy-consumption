@@ -34,31 +34,45 @@ def plot_baseline(intercept, coef, X_test, Y_pred):
 
 def get_statsmodels_table(X, Y):
     """
-                                        OLS Regression Results                            
+        OLS Regression Results                            
         ==============================================================================
-        Dep. Variable:                    MWh   R-squared:                       0.387
-        Model:                            OLS   Adj. R-squared:                  0.387
-        Method:                 Least Squares   F-statistic:                     1106.
-        Date:                Sun, 08 Nov 2020   Prob (F-statistic):               0.00
-        Time:                        14:48:53   Log-Likelihood:                -55653.
-        No. Observations:                8760   AIC:                         1.113e+05
-        Df Residuals:                    8754   BIC:                         1.114e+05
-        Df Model:                           5                                         
+        Dep. Variable:                    MWh   R-squared:                       0.558
+        Model:                            OLS   Adj. R-squared:                  0.558
+        Method:                 Least Squares   F-statistic:                     7149.
+        Date:                Sun, 15 Nov 2020   Prob (F-statistic):               0.00
+        Time:                        16:53:03   Log-Likelihood:            -6.0017e+05
+        No. Observations:               96406   AIC:                         1.200e+06
+        Df Residuals:                   96388   BIC:                         1.201e+06
+        Df Model:                          17                                         
         Covariance Type:            nonrobust                                         
         ==============================================================================
                         coef    std err          t      P>|t|      [0.025      0.975]
         ------------------------------------------------------------------------------
-        const        847.4236      7.488    113.167      0.000     832.745     862.102
-        tempC         27.6532      1.565     17.674      0.000      24.586      30.720
-        HeatIndexC     6.0404      1.424      4.242      0.000       3.249       8.832
-        WindChillC   -24.9396      1.461    -17.068      0.000     -27.804     -22.075
-        humidity      -2.8734      0.074    -38.859      0.000      -3.018      -2.728
-        uvIndex       -1.2631      1.678     -0.753      0.452      -4.552       2.026
+        const        530.3403      2.004    264.682      0.000     526.413     534.268
+        tempC         21.5788      0.425     50.821      0.000      20.747      22.411
+        HeatIndexC    -1.9317      0.397     -4.864      0.000      -2.710      -1.153
+        WindChillC   -11.4889      0.410    -28.014      0.000     -12.293     -10.685
+        humidity      -1.4092      0.022    -63.235      0.000      -1.453      -1.366
+        uvIndex      -12.8722      0.628    -20.487      0.000     -14.104     -11.641
+        jan           90.1910      1.566     57.586      0.000      87.121      93.261
+        feb           33.8232      1.449     23.348      0.000      30.984      36.663
+        mar          -46.6812      1.382    -33.788      0.000     -49.389     -43.973
+        apr          -89.7150      1.337    -67.089      0.000     -92.336     -87.094
+        may          -27.7993      1.440    -19.302      0.000     -30.622     -24.977
+        jun          108.4988      1.754     61.854      0.000     105.061     111.937
+        jul          165.9890      1.954     84.935      0.000     162.159     169.819
+        aug          172.0845      1.979     86.939      0.000     168.205     175.964
+        sep           90.3389      1.492     60.533      0.000      87.414      93.264
+        oct          -41.8207      1.343    -31.139      0.000     -44.453     -39.188
+        nov          -16.8303      1.444    -11.652      0.000     -19.661     -13.999
+        dec           92.2617      1.850     49.865      0.000      88.635      95.888
+        peakH        300.7522      1.079    278.652      0.000     298.637     302.868
+        notPeakH     229.5881      1.164    197.171      0.000     227.306     231.870
         ==============================================================================
-        Omnibus:                      374.057   Durbin-Watson:                   0.061
-        Prob(Omnibus):                  0.000   Jarque-Bera (JB):              419.643
-        Skew:                           0.531   Prob(JB):                     7.51e-92
-        Kurtosis:                       2.847   Cond. No.                         388.
+        Omnibus:                     5483.009   Durbin-Watson:                   0.098
+        Prob(Omnibus):                  0.000   Jarque-Bera (JB):             6684.159
+        Skew:                           0.582   Prob(JB):                         0.00
+        Kurtosis:                       3.558   Cond. No.                     8.73e+17
         ==============================================================================
     """
     X = sm.add_constant(X) # adding a constant
@@ -76,15 +90,13 @@ def get_manual_accuracy(Y_test, Y_pred, percent=0.1):
         pred = Y_pred[i]
         margin = percent * true_val
         if pred-margin <= true_val <= pred+margin:
-            # if pred-25 <= true_val <= pred+25:
-            #     print("i: ", i, "Y_test: ", Y_test[i], "Y_pred: ", Y_pred[i])
             correct+=1
     accuracy = correct / len(Y_test)
     return accuracy
 
 def multivariable_regression(filename, features_list):
     """
-    COLUMN FIELDS: cols: Date,MWh,uvIndex,HeatIndexC,WindChillC,humidity,tempC
+    COLUMN FIELDS: cols: Date,MWh,uvIndex,HeatIndexC,WindChillC,humidity,tempC, 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', "peakH", "notPeakH"
 
     If JUST the temp/energy (simple LR):
     Intercept: 625.7157440367006
@@ -93,28 +105,14 @@ def multivariable_regression(filename, features_list):
         [10.6531254]
     mean_sq_err:  25097.500364439336
     Manual accuracy:  0.38396118721461187
-
-    Predictions, when split train/test:
-        Intercept:  829.2318130846693
-        Coefficients: 
-        ["tempC",      "HeatIndexC",   "WindChillC",    "humidity",     "uvIndex"]]
-        [ 26.77415029  12.09465205      -29.3946928     -2.81113462     -2.37345755]
-        
-        mean_sq_err:  21629.355399131226
-        Manual accuracy:  0.43767123287671234 --> 43% accuracy within 10% of the true value
-    
-    
-    Without uvIndex, got slightly better: Manual accuracy:  0.43818493150684934, see results.txt
     """
     df_total = pd.read_csv(filename)
+    df_total.dropna(inplace=True) # only 1 row is dropped
 
     df_train = df_total.iloc[:index_2018_start, :]
     df_test = df_total.iloc[index_2018_start:, :]
     df_test = df_test.reset_index() # start rows counting at 0
     
-    df_train.dropna(inplace=True) # TODO: shouldn't be getting NANs here
-    df_test.dropna(inplace=True)
-
     # plot_linear_relationship(df, "tempC")
     # X_train = df_train[["tempC", "HeatIndexC", "WindChillC", "humidity", "uvIndex"]]
     X_train = df_train[features_list]
@@ -126,7 +124,7 @@ def multivariable_regression(filename, features_list):
     print('Intercept: ', regr.intercept_)
     print('Coefficients: ', regr.coef_)
 
-    # get_statsmodels_table(X,Y)
+    # get_statsmodels_table(df_total[features_list], df_total["MWh"])
 
     # Make predictions using the testing set
     # X_test = df_test[["tempC", "HeatIndexC", "WindChillC", "humidity", "uvIndex"]]
@@ -199,8 +197,7 @@ def baseline_simple_LR(train_filename, test_filename):
 
 if __name__ == "__main__":
     # filename = "texas_2009_to_2019_dataset01.csv"
-    # filename = "texas_2009_to_2019_dataset_with_months.csv"
-    filename = "texas_2009_to_2019_dataset_with_vector_months.csv"
+    filename = "texas_2009_to_2019_dataset_with_temporal_features.csv"
     # train_filename = "train_texas_2009_to_2017_dataset.csv"     # 80% of dataset
     # test_filename = "test_texas_2018_to_2019_dataset.csv"       # 20% of dataset
 
@@ -210,9 +207,10 @@ if __name__ == "__main__":
     # data = Data("san_diego_2019_dataset.csv")
     # simple_linear_regression(filename)
 
-    features = ["tempC", "HeatIndexC", "WindChillC", "humidity", "uvIndex", 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+    features = ["tempC", "HeatIndexC", "WindChillC", "humidity", "uvIndex", 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', "peakH", "notPeakH"]
     # baseline_simple_LR(train_filename, test_filename)
     multivariable_regression(filename, features)
+    # add_peak_hours_to_dataset()
 
     
 

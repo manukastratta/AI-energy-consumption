@@ -71,6 +71,36 @@ def add_months_features_to_dataset():
             
         csvwriter.writerows(new_rows) # writing the data rows  
 
+def add_peak_hours_to_dataset():
+    filename =  "texas_2009_to_2019_dataset_with_vector_months.csv"
+    all_data = Data(filename) 
+
+    new_rows = []
+    for row in all_data.rows:
+        date_time_str = row[0] # eg. 2011-08-01 16:00:00
+        date_time_obj = datetime.datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
+        
+        new_row = row.copy()
+        if 9 <= date_time_obj.hour <= 21: # peak hours! everyone awake, more energy consumption
+            peak_vec = [1, 0]
+        else:
+            peak_vec = [0, 1]
+        
+        new_row = new_row + peak_vec
+        new_rows.append(new_row)
+    assert len(all_data.rows) == len(new_rows)
+
+    # create new file with new rows now
+    new_filename = "texas_2009_to_2019_dataset_with_vector_months_and_peakH.csv"
+    
+    with open(new_filename, 'w') as csvfile:    # writing to csv file 
+        csvwriter = csv.writer(csvfile)  
+        
+        new_fields = all_data.fields.copy()  # writing the fields  
+        new_fields = new_fields + ["peakH", "notPeakH"]
+        csvwriter.writerow(new_fields)  
+            
+        csvwriter.writerows(new_rows) # writing the data rows  
 
 def create_year_data(filename, year):
     all_data = Data(filename) # reads and initializes data

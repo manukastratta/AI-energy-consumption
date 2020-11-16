@@ -1,3 +1,13 @@
+Results when having 12 features for months + peak/not peak features (improved accuracy! 52.9%)
+Intercept:  839.478421053073
+Coefficients:  [  21.43985914   -1.2717129   -12.17801733   -1.44625113  -12.72288926
+   39.74894055  -14.71974429  -89.15489135 -129.82395461  -74.70633742
+   70.45604308  125.5723291   128.66129757   44.29912733  -85.26091822
+  -67.29928603   52.2273943    36.06764301  -36.06764301]
+mean_sq_err:  16027.46733795814
+Manual accuracy:  0.5292237442922374
+{'mape': 0.11, 'me': -23.15, 'mae': 96.99, 'mpe': -0.01, 'rmse': 126.6, 'corr': 0.73, 'minmax': 0.1}
+
 Results when instead having 12 features for the months: (better accuracy! 51.3%)
 Intercept:  860.7311928115377
 Coefficients:  [  21.59415859    2.19544883  -11.98472475   -1.93605835  -25.69986404
