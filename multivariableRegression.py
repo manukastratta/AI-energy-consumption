@@ -8,6 +8,9 @@ from matplotlib import pyplot as plt
 import statsmodels.api as sm
 from utils import powerset, forecast_accuracy
 from dataUtils import Data
+import copy
+
+index_2018_start = 78887
 
 def plot_linear_relationship(df, x_name):
     plt.scatter(df[x_name], df["MWh"], color='green')
@@ -15,6 +18,18 @@ def plot_linear_relationship(df, x_name):
     plt.xlabel(x_name, fontsize=14)
     plt.ylabel('Energy Consumption', fontsize=14)
     plt.grid(True)
+    plt.show()
+
+def plot_baseline(intercept, coef, X_test, Y_pred):
+    plt.title("Temperature vs Energy, Baseline Linear Regression")
+    plt.xlabel("Temperature (C)")
+    plt.ylabel("Energy Consumption (MWh)")
+
+    plt.text(0, 1400, f"Intercept: {round(float(intercept),3)}, \nCoefficient: {round(float(coef),3)}")
+
+    plt.scatter(X_test, Y_pred, color='g')
+    # plt.plot(X, model.predict(X),color='b')
+
     plt.show()
 
 def get_statsmodels_table(X, Y):
@@ -61,11 +76,13 @@ def get_manual_accuracy(Y_test, Y_pred, percent=0.1):
         pred = Y_pred[i]
         margin = percent * true_val
         if pred-margin <= true_val <= pred+margin:
-           correct+=1
+            # if pred-25 <= true_val <= pred+25:
+            #     print("i: ", i, "Y_test: ", Y_test[i], "Y_pred: ", Y_pred[i])
+            correct+=1
     accuracy = correct / len(Y_test)
     return accuracy
 
-def multivariable_regression(train_filename, test_filename, features_list):
+def multivariable_regression(filename, features_list):
     """
     COLUMN FIELDS: cols: Date,MWh,uvIndex,HeatIndexC,WindChillC,humidity,tempC
 
@@ -89,9 +106,12 @@ def multivariable_regression(train_filename, test_filename, features_list):
     
     Without uvIndex, got slightly better: Manual accuracy:  0.43818493150684934, see results.txt
     """
-    df_train = pd.read_csv(train_filename) 
-    df_test = pd.read_csv(test_filename)
+    df_total = pd.read_csv(filename)
 
+    df_train = df_total.iloc[:index_2018_start, :]
+    df_test = df_total.iloc[index_2018_start:, :]
+    df_test = df_test.reset_index() # start rows counting at 0
+    
     df_train.dropna(inplace=True) # TODO: shouldn't be getting NANs here
     df_test.dropna(inplace=True)
 
@@ -142,12 +162,47 @@ def experiment_w_features(filename, train_filename, test_filename):
 
 
 def baseline_simple_LR(train_filename, test_filename):
-    multivariable_regression(train_filename, test_filename, ["tempC"])
+    df_train = pd.read_csv(train_filename) 
+    df_test = pd.read_csv(test_filename)
+
+    df_train.dropna(inplace=True) # TODO: shouldn't be getting NANs here
+    df_test.dropna(inplace=True)
+
+    X_train = df_train[["tempC"]]
+    Y_train = df_train["MWh"]
+
+    regr = linear_model.LinearRegression()
+    regr.fit(X_train, Y_train)
+
+    print('Intercept: ', regr.intercept_)
+    print('Coefficients: ', regr.coef_)
+
+    # Make predictions using the testing set
+    X_test = df_test[["tempC"]]
+    Y_test = df_test["MWh"]
+    Y_pred = regr.predict(X_test)
+
+    # Evaluation
+    mean_sq_err = metrics.mean_squared_error(Y_test, Y_pred)
+    print("mean_sq_err: ", mean_sq_err)
+    manual_accuracy = get_manual_accuracy(Y_test, Y_pred, percent=0.1)
+    print("Manual accuracy: ", manual_accuracy)
+    r2 = metrics.r2_score(Y_test, Y_pred)
+    print("r2 score: ", r2)
+
+    res = forecast_accuracy(Y_pred, Y_test)
+    print(res)
+
+    # Plot results
+    plot_baseline(regr.intercept_, regr.coef_, X_test, Y_pred)
+
 
 if __name__ == "__main__":
-    filename = "texas_2009_to_2019_dataset01.csv"
-    train_filename = "train_texas_2009_to_2017_dataset.csv"     # 80% of dataset
-    test_filename = "test_texas_2018_to_2019_dataset.csv"       # 20% of dataset
+    # filename = "texas_2009_to_2019_dataset01.csv"
+    # filename = "texas_2009_to_2019_dataset_with_months.csv"
+    filename = "texas_2009_to_2019_dataset_with_vector_months.csv"
+    # train_filename = "train_texas_2009_to_2017_dataset.csv"     # 80% of dataset
+    # test_filename = "test_texas_2018_to_2019_dataset.csv"       # 20% of dataset
 
     # split_data(filename)
     # create_year_data(filename, "2019")
@@ -155,9 +210,9 @@ if __name__ == "__main__":
     # data = Data("san_diego_2019_dataset.csv")
     # simple_linear_regression(filename)
 
-    features = ["tempC", "HeatIndexC", "WindChillC", "humidity", "uvIndex"]
+    features = ["tempC", "HeatIndexC", "WindChillC", "humidity", "uvIndex", 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
     # baseline_simple_LR(train_filename, test_filename)
-    multivariable_regression(train_filename, test_filename, features)
+    multivariable_regression(filename, features)
 
     
 
