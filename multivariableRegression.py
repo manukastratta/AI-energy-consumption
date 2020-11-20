@@ -20,17 +20,6 @@ def plot_linear_relationship(df, x_name):
     plt.grid(True)
     plt.show()
 
-def plot_baseline(intercept, coef, X_test, Y_pred):
-    plt.title("Temperature vs Energy, Baseline Linear Regression")
-    plt.xlabel("Temperature (C)")
-    plt.ylabel("Energy Consumption (MWh)")
-
-    plt.text(0, 1400, f"Intercept: {round(float(intercept),3)}, \nCoefficient: {round(float(coef),3)}")
-
-    plt.scatter(X_test, Y_pred, color='g')
-    # plt.plot(X, model.predict(X),color='b')
-
-    plt.show()
 
 def get_statsmodels_table(X, Y):
     """
@@ -83,6 +72,18 @@ def get_statsmodels_table(X, Y):
     print_model = model.summary()
     print(print_model)
 
+def plot_error(Y_test, Y_pred):
+    plt.title("Actual vs Predicted Energy Consumption, Multiple Linear Regression")
+    plt.xlabel("Datapoints")
+    plt.ylabel("Energy Consumption (MWh)")
+
+    r = [i for i in range(len(Y_test))]
+
+    plt.scatter(r, Y_test, color='g', s=1)   # true consumption
+    plt.scatter(r, Y_pred, color='r', s=1)   # predicted consumption
+
+    plt.show()
+
 def get_manual_accuracy(Y_test, Y_pred, percent=0.1):
     correct = 0
     for i in range(len(Y_test)):
@@ -106,7 +107,7 @@ def split_dataset(filename):
 
 def multivariable_regression(filename, features_list):
     """
-    COLUMN FIELDS: cols: Date,MWh,uvIndex,HeatIndexC,WindChillC,humidity,tempC, 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', "peakH", "notPeakH"
+    COLUMN FIELDS: cols: Date,MWh,uvIndex,HeatIndexC,WindChillC,humidity,tempC, 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', "peakH"
 
     If JUST the temp/energy (simple LR):
     Intercept: 625.7157440367006
@@ -146,6 +147,8 @@ def multivariable_regression(filename, features_list):
     res = forecast_accuracy(Y_pred, Y_test)
     print(res)
 
+    plot_error(Y_test, Y_pred)
+
 
 def experiment_w_features(filename, train_filename, test_filename):
     """
@@ -164,42 +167,10 @@ def experiment_w_features(filename, train_filename, test_filename):
         multivariable_regression(train_filename, test_filename, features)
 
 
-def baseline_simple_LR(filename):
-    df_train, df_test = split_dataset(filename)
-
-    X_train = df_train[["tempC"]]
-    Y_train = df_train["MWh"]
-
-    regr = linear_model.LinearRegression()
-    regr.fit(X_train, Y_train)
-
-    print('Intercept: ', regr.intercept_)
-    print('Coefficients: ', regr.coef_)
-
-    # Make predictions using the testing set
-    X_test = df_test[["tempC"]]
-    Y_test = df_test["MWh"]
-    Y_pred = regr.predict(X_test)
-
-    # Evaluation
-    mean_sq_err = metrics.mean_squared_error(Y_test, Y_pred)
-    print("mean_sq_err: ", mean_sq_err)
-    manual_accuracy = get_manual_accuracy(Y_test, Y_pred, percent=0.1)
-    print("Manual accuracy: ", manual_accuracy)
-    r2 = metrics.r2_score(Y_test, Y_pred)
-    print("r2 score: ", r2)
-
-    res = forecast_accuracy(Y_pred, Y_test)
-    print(res)
-
-    # Plot results
-    plot_baseline(regr.intercept_, regr.coef_, X_test, Y_pred)
-
 
 if __name__ == "__main__":
     # filename = "texas_2009_to_2019_dataset01.csv"
     filename = "texas_2009_to_2019_dataset_with_temporal_features.csv"
 
-    features = ["tempC", "HeatIndexC", "WindChillC", "humidity", "uvIndex", 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', "peakH", "notPeakH"]
-    # baseline_simple_LR(filename)
+    features = ["tempC", "HeatIndexC", "WindChillC", "humidity", "uvIndex", 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', "peakH"]
     multivariable_regression(filename, features)
