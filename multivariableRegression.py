@@ -105,6 +105,19 @@ def split_dataset(filename):
 
     return df_train, df_test
 
+def get_error_analysis(Y_test, Y_pred):
+    mean_sq_err = metrics.mean_squared_error(Y_test, Y_pred)
+    print("mean_sq_err: ", mean_sq_err)
+
+    manual_accuracy = get_manual_accuracy(Y_test, Y_pred, percent=0.1)
+    print("Manual accuracy: ", manual_accuracy)
+
+    r2 = metrics.r2_score(Y_test, Y_pred)
+    print("r2 score: ", r2)
+
+    res = forecast_accuracy(Y_pred, Y_test)
+    print(res)
+
 def multivariable_regression(filename, features_list):
     """
     COLUMN FIELDS: cols: Date,MWh,uvIndex,HeatIndexC,WindChillC,humidity,tempC, 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', "peakH"
@@ -120,7 +133,6 @@ def multivariable_regression(filename, features_list):
     df_train, df_test = split_dataset(filename)
     
     # plot_linear_relationship(df, "tempC")
-    # X_train = df_train[["tempC", "HeatIndexC", "WindChillC", "humidity", "uvIndex"]]
     X_train = df_train[features_list]
     Y_train = df_train["MWh"]
 
@@ -133,20 +145,13 @@ def multivariable_regression(filename, features_list):
     # get_statsmodels_table(df_total[features_list], df_total["MWh"])
 
     # Make predictions using the testing set
-    # X_test = df_test[["tempC", "HeatIndexC", "WindChillC", "humidity", "uvIndex"]]
     X_test = df_test[features_list]
     Y_test = df_test["MWh"]
 
     Y_pred = regr.predict(X_test)
-    mean_sq_err = metrics.mean_squared_error(Y_test, Y_pred)
-    print("mean_sq_err: ", mean_sq_err)
-
-    manual_accuracy = get_manual_accuracy(Y_test, Y_pred, percent=0.1)
-    print("Manual accuracy: ", manual_accuracy)
-
-    res = forecast_accuracy(Y_pred, Y_test)
-    print(res)
-
+    
+    # Error Analysis
+    get_error_analysis(Y_test, Y_pred)
     plot_error(Y_test, Y_pred)
 
 

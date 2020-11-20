@@ -9,7 +9,7 @@ import statsmodels.api as sm
 from utils import powerset, forecast_accuracy
 from dataUtils import Data
 import copy
-from multivariableRegression import split_dataset, get_manual_accuracy
+from multivariableRegression import split_dataset, get_manual_accuracy, get_error_analysis
 
 
 
@@ -51,18 +51,8 @@ def baseline_simple_LR(filename):
     Y_test = df_test["MWh"]
     Y_pred = regr.predict(X_test)
 
-    # Evaluation
-    mean_sq_err = metrics.mean_squared_error(Y_test, Y_pred)
-    print("mean_sq_err: ", mean_sq_err)
-    manual_accuracy = get_manual_accuracy(Y_test, Y_pred, percent=0.1)
-    print("Manual accuracy: ", manual_accuracy)
-    r2 = metrics.r2_score(Y_test, Y_pred)
-    print("r2 score: ", r2)
-
-    res = forecast_accuracy(Y_pred, Y_test)
-    print(res)
-
-    # Plot results
+    # Evaluation / Error analysis
+    get_error_analysis(Y_test, Y_pred)
     plot_baseline(X_test, Y_test, Y_pred, regr.intercept_, regr.coef_)
 
 
