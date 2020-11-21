@@ -79,8 +79,15 @@ def plot_error(Y_test, Y_pred):
 
     r = [i for i in range(len(Y_test))]
 
-    plt.scatter(r, Y_test, color='g', s=1)   # true consumption
-    plt.scatter(r, Y_pred, color='r', s=1)   # predicted consumption
+    a = plt.scatter(r, Y_test, color='g', s=1)   # true consumption
+    b = plt.scatter(r, Y_pred, color='r', s=1)   # predicted consumption
+
+    plt.legend((a, b),
+           ('True Consumption', 'Predicted Consumption'),
+           scatterpoints=1,
+           loc='upper right',
+           ncol=1,
+           fontsize=8)
 
     plt.show()
 
@@ -129,6 +136,19 @@ def multivariable_regression(filename, features_list):
         [10.6531254]
     mean_sq_err:  25097.500364439336
     Manual accuracy:  0.38396118721461187
+
+
+    Example
+    Y_pred:  975.5659932456297
+    Y_test:  1016.318971
+
+    Date,MWh,uvIndex,HeatIndexC,WindChillC,humidity,tempC,jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec,peakH
+    03/01/2018 13:00,1016.318971,       4,26,24,54,24,1,0,0,0,0,0,0,0,0,0,0,0,1
+
+    4,26,24,54,24,1,0,0,0,0,0,0,0,0,0,0,0,1
+    ["tempC", "HeatIndexC", "WindChillC", "humidity", "uvIndex", "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec", "peakH"]
+    24,         26,             24,             54,     4,          1,0,0,0,0,0,0,0,0,0,0,0,1
+
     """
     df_train, df_test = split_dataset(filename)
     
